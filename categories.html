@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analyse par Catégories - Dashboard Fiscal Trump</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --neon-blue: #00f3ff;
+            --neon-cyan: #00ffea;
+            --neon-purple: #b967ff;
+            --dark-bg: #0a0a0a;
+            --dark-card: #111111;
+            --dark-border: #1a1a1a;
+            --grid-color: rgba(0, 243, 255, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Rajdhani', sans-serif;
+            background-color: var(--dark-bg);
+            color: #fff;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                linear-gradient(90deg, var(--grid-color) 1px, transparent 1px) 0 0 / 20px 20px,
+                linear-gradient(0deg, var(--grid-color) 1px, transparent 1px) 0 0 / 20px 20px;
+            z-index: -1;
+            animation: gridMove 20s linear infinite;
+        }
+
+        @keyframes gridMove {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(20px, 20px); }
+        }
+
+        .cyberpunk-nav {
+            background: rgba(10, 10, 10, 0.9) !important;
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--neon-blue);
+            box-shadow: 0 0 15px rgba(0, 243, 255, 0.3);
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        .cyberpunk-nav .navbar-brand {
+            color: var(--neon-cyan) !important;
+            font-weight: 900;
+            text-shadow: 0 0 10px var(--neon-cyan);
+            letter-spacing: 1px;
+        }
+
+        .cyberpunk-nav .nav-link {
+            color: #fff !important;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .cyberpunk-nav .nav-link:hover, .cyberpunk-nav .nav-link.active {
+            color: var(--neon-blue) !important;
+            text-shadow: 0 0 8px var(--neon-blue);
+        }
+
+        .cyberpunk-nav .nav-link.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: var(--neon-blue);
+            box-shadow: 0 0 8px var(--neon-blue);
+        }
+
+        .dashboard-header {
+            background: linear-gradient(135deg, rgba(0, 243, 255, 0.1), rgba(185, 103, 255, 0.1));
+            color: white;
+            padding: 2rem 2rem;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid var(--neon-blue);
+            box-shadow: 0 5px 20px rgba(0, 243, 255, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .dashboard-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M0,0 L100,0 L100,100 Z" fill="rgba(0,243,255,0.05)"/></svg>');
+            background-size: cover;
+        }
+
+        .dashboard-header h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 900;
+            text-shadow: 0 0 15px var(--neon-cyan);
+            letter-spacing: 2px;
+        }
+
+        .cyber-card {
+            background: var(--dark-card);
+            border: 1px solid var(--dark-border);
+            border-radius: 8px;
+            box-shadow: 0 0 15px rgba(0, 243, 255, 0.1);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 1.5rem;
+        }
+
+        .cyber-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 243, 255, 0.1), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .cyber-card:hover::before {
+            left: 100%;
+        }
+
+        .cyber-card:hover {
+            border-color: var(--neon-blue);
+            box-shadow: 0 0 20px rgba(0, 243, 255, 0.3);
+            transform: translateY(-5px);
+        }
+
+        .cyber-card .card-header {
+            background: rgba(20, 20, 20, 0.8);
+            border-bottom: 1px solid var(--neon-blue);
+            color: var(--neon-cyan);
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            padding: 1rem 1.25rem;
+        }
+
+        .cyber-card .card-body {
+            padding: 1.5rem;
+        }
+
+        .stat-card {
+            background: linear-gradient(145deg, rgba(0, 243, 255, 0.1), rgba(185, 103, 255, 0.1));
+            border: 1px solid rgba(0, 243, 255, 0.3);
+            border-radius: 8px;
+            padding: 1.5rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            height: 100%;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, transparent, rgba(0, 243, 255, 0.05), transparent);
+            transform: translateX(-100%);
+        }
+
+        .stat-card:hover::before {
+            animation: shimmer 1.5s ease;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .stat-card:hover {
+            border-color: var(--neon-cyan);
+            box-shadow: 0 0 20px rgba(0, 243, 255, 0.4);
+            transform: translateY(-5px);
+        }
+
+        .stat-card i {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: var(--neon-cyan);
+            text-shadow: 0 0 10px var(--neon-cyan);
+        }
+
+        .stat-card h3 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.2rem;
+            font-weight: 900;
+            margin-bottom: 0.5rem;
+            color: var(--neon-cyan);
+            text-shadow: 0 0 8px var(--neon-cyan);
+        }
+
+        .stat-card p {
+            color: #ccc;
+            font-weight: 500;
+        }
+
+        .cyber-badge {
+            background: rgba(0, 243, 255, 0.2);
+            border: 1px solid var(--neon-blue);
+            color: var(--neon-cyan);
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            padding: 0.4rem 0.8rem;
+            border-radius: 4px;
+            text-shadow: 0 0 5px var(--neon-cyan);
+            box-shadow: 0 0 8px rgba(0, 243, 255, 0.3);
+        }
+
+        .cyber-button {
+            background: transparent;
+            border: 1px solid var(--neon-blue);
+            color: var(--neon-cyan);
+            padding: 0.6rem 1.5rem;
+            border-radius: 4px;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            text-shadow: 0 0 5px var(--neon-cyan);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cyber-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 243, 255, 0.3), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .cyber-button:hover::before {
+            left: 100%;
+        }
+
+        .cyber-button:hover {
+            background: rgba(0, 243, 255, 0.1);
+            box-shadow: 0 0 15px rgba(0, 243, 255, 0.4);
+            color: var(--neon-cyan);
+        }
+
+        .glow-text {
+            text-shadow: 0 0 10px currentColor;
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(0, 243, 255, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(0, 243, 255, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(0, 243, 255, 0); }
+        }
+
+        .cyber-footer {
+            background: rgba(10, 10, 10, 0.9);
+            border-top: 1px solid var(--neon-blue);
+            color: #aaa;
+            padding: 1.5rem 0;
+            margin-top: 3rem;
+            font-family: 'Rajdhani', sans-serif;
+        }
+
+        .scan-line {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--neon-cyan), transparent);
+            box-shadow: 0 0 10px var(--neon-cyan);
+            z-index: 1000;
+            animation: scan 3s linear infinite;
+        }
+
+        @keyframes scan {
+            0% { top: 0; }
+            100% { top: 100%; }
+        }
+
+        .terminal-text {
+            font-family: 'Courier New', monospace;
+            color: var(--neon-cyan);
+            text-shadow: 0 0 5px var(--neon-cyan);
+            border-right: 2px solid var(--neon-cyan);
+            animation: blink 1s step-end infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { border-color: var(--neon-cyan); }
+            50% { border-color: transparent; }
+        }
+
+        .chart-container {
+            position: relative;
+            height: 100%;
+            width: 100%;
+        }
+
+        .category-badge {
+            background: rgba(0, 243, 255, 0.1);
+            border: 1px solid var(--neon-blue);
+            color: var(--neon-cyan);
+            padding: 0.3rem 0.8rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
+            display: inline-block;
+        }
+
+        .impact-positive {
+            color: #00ff00;
+            text-shadow: 0 0 5px #00ff00;
+        }
+
+        .impact-negative {
+            color: #ff0066;
+            text-shadow: 0 0 5px #ff0066;
+        }
+
+        .sector-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .sector-item {
+            background: rgba(20, 20, 20, 0.6);
+            border: 1px solid rgba(0, 243, 255, 0.2);
+            border-radius: 4px;
+            padding: 0.8rem;
+            margin-bottom: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .sector-item:hover {
+            border-color: var(--neon-blue);
+            background: rgba(0, 243, 255, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="scan-line"></div>
+
+    <nav class="navbar navbar-expand-lg navbar-dark cyberpunk-nav">
+        <div class="container">
+            <a class="navbar-brand glow-text" href="index.html">
+                <i class="fas fa-chart-bar me-2"></i>TRUMP FISCAL DASHBOARD
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="index.html"><i class="fas fa-home me-1"></i>ACCUEIL</a></li>
+                    <li class="nav-item"><a class="nav-link" href="historique.html"><i class="fas fa-history me-1"></i>ANALYSE HISTORIQUE</a></li>
+                    <li class="nav-item"><a class="nav-link" href="pays.html"><i class="fas fa-globe-americas me-1"></i>DONNÉES PAR PAYS</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="categories.html"><i class="fas fa-chart-pie me-1"></i>ANALYSE PAR CATÉGORIES</a></li>
+                    <li class="nav-item"><a class="nav-link" href="real-time.html"><i class="fas fa-bolt me-1"></i>TEMPS RÉEL</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="dashboard-header">
+        <div class="container text-center">
+            <h1 class="display-4 mb-3">ANALYSE PAR CATÉGORIES</h1>
+            <p class="lead terminal-text">RÉPARTITION DES MESURES COMMERCIALES PAR TYPE</p>
+            <div class="d-flex justify-content-center align-items-center mt-3">
+                <span class="cyber-badge me-3 pulse">
+                    <i class="fas fa-circle me-1"></i>SYSTÈME EN LIGNE
+                </span>
+                <span class="text-white-50">DERNIÈRE MISE À JOUR: <span id="globalUpdateTime" class="terminal-text">--:--:--</span></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="container mt-4">
+        <!-- Cartes de statistiques principales -->
+        <div class="row mb-4">
+            <div class="col-md-3 mb-3">
+                <div class="stat-card">
+                    <i class="fas fa-tags"></i>
+                    <h3>187</h3>
+                    <p class="mb-0">MESURES TARIFAIRES</p>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="stat-card">
+                    <i class="fas fa-receipt"></i>
+                    <h3>92</h3>
+                    <p class="mb-0">TAXES IMPORTATION</p>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="stat-card">
+                    <i class="fas fa-ban"></i>
+                    <h3>45</h3>
+                    <p class="mb-0">MESURES ANTI-DUMPING</p>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="stat-card">
+                    <i class="fas fa-hand-holding-usd"></i>
+                    <h3>28</h3>
+                    <p class="mb-0">SUBVENTIONS</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-8 mb-4">
+                <div class="cyber-card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0 glow-text">DISTRIBUTION DES MESURES PAR CATÉGORIE</h5>
+                        <small class="text-muted">MIS À JOUR: <span id="updateTime1" class="terminal-text">--:--:--</span></small>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container">
+                            <canvas id="categoryDistributionChart" height="250"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="cyber-card">
+                    <div class="card-header">
+                        <h5 class="glow-text">SECTEURS LES PLUS IMPACTÉS</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="sector-list">
+                            <div class="sector-item">
+                                <div class="d-flex justify-content-between">
+                                    <span>ACIER & ALUMINIUM</span>
+                                    <span class="impact-negative">42 mesures</span>
+                                </div>
+                            </div>
+                            <div class="sector-item">
+                                <div class="d-flex justify-content-between">
+                                    <span>ÉLECTRONIQUE</span>
+                                    <span class="impact-negative">38 mesures</span>
+                                </div>
+                            </div>
+                            <div class="sector-item">
+                                <div class="d-flex justify-content-between">
+                                    <span>AUTOMOBILE</span>
+                                    <span class="impact-negative">35 mesures</span>
+                                </div>
+                            </div>
+                            <div class="sector-item">
+                                <div class="d-flex justify-content-between">
+                                    <span>AGRICULTURE</span>
+                                    <span class="impact-negative">28 mesures</span>
+                                </div>
+                            </div>
+                            <div class="sector-item">
+                                <div class="d-flex justify-content-between">
+                                    <span>ÉNERGIE</span>
+                                    <span class="impact-negative">22 mesures</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 mb-4">
+                <div class="cyber-card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0 glow-text">IMPACT ÉCONOMIQUE PAR CATÉGORIE</h5>
+                        <small class="text-muted">EN MILLIARDS USD</small>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container">
+                            <canvas id="economicImpactChart" height="250"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 mb-4">
+                <div class="cyber-card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0 glow-text">MESURES PAR SECTEUR</h5>
+                        <small class="text-muted">NOMBRE DE MESURES</small>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container">
+                            <canvas id="sectorMeasuresChart" height="250"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="cyber-card">
+                    <div class="card-header">
+                        <h5 class="glow-text">DÉTAIL DES MESURES PAR CATÉGORIE</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-dark table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>CATÉGORIE</th>
+                                        <th>DESCRIPTION</th>
+                                        <th>DATE</th>
+                                        <th>CIBLES</th>
+                                        <th>IMPACT</th>
+                                        <th>STATUT</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><span class="category-badge">TARIFS DOUANIERS</span></td>
+                                        <td>Tarifs sur l'acier (25%) et l'aluminium (10%)</td>
+                                        <td>Mars 2018</td>
+                                        <td>Chine, UE, Canada, Mexique</td>
+                                        <td class="impact-negative">-$18B</td>
+                                        <td><span class="cyber-badge">ACTIF</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><span class="category-badge">TAXES IMPORTATION</span></td>
+                                        <td>Taxes supplémentaires produits électroniques</td>
+                                        <td>Sept 2019</td>
+                                        <td>Chine</td>
+                                        <td class="impact-negative">-$12B</td>
+                                        <td><span class="cyber-badge">ACTIF</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><span class="category-badge">ANTI-DUMPING</span></td>
+                                        <td>Mesures anti-dumping sur panneaux solaires</td>
+                                        <td>Jan 2018</td>
+                                        <td>Chine, Corée du Sud</td>
+                                        <td class="impact-negative">-$3B</td>
+                                        <td><span class="cyber-badge">ACTIF</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><span class="category-badge">ACCORD COMMERCIAL</span></td>
+                                        <td>Renégociation USMCA</td>
+                                        <td>Juillet 2020</td>
+                                        <td>Canada, Mexique</td>
+                                        <td class="impact-positive">+$5B</td>
+                                        <td><span class="cyber-badge">ACTIF</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><span class="category-badge">SUBVENTIONS</span></td>
+                                        <td>Aides à l'agriculture américaine</td>
+                                        <td>Mai 2019</td>
+                                        <td>Domestique</td>
+                                        <td class="impact-positive">+$3B</td>
+                                        <td><span class="cyber-badge">ACTIF</span></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="cyber-footer">
+        <div class="container text-center">
+            <p class="mb-0 terminal-text">DASHBOARD FISCAL TRUMP &copy; 2025 - SYSTÈME CYBERNETIQUE</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Données pour les graphiques
+        const categoriesData = {
+            distribution: {
+                labels: ['TARIFS DOUANIERS', 'TAXES IMPORTATION', 'MESURES ANTI-DUMPING', 'SUBVENTIONS', 'BARRIÈRES NON-TARIFAIRES'],
+                data: [187, 92, 45, 28, 33],
+                colors: ['#00f3ff', '#00ffea', '#b967ff', '#ff00ff', '#ffff00']
+            },
+            
+            economicImpact: {
+                labels: ['TARIFS DOUANIERS', 'TAXES IMPORTATION', 'ANTI-DUMPING', 'SUBVENTIONS', 'ACCORDS'],
+                data: [-45, -28, -15, 8, 12],
+                colors: ['#00f3ff', '#00ffea', '#b967ff', '#ff00ff', '#ffff00']
+            },
+            
+            sectors: {
+                labels: ['ACIER & ALUMINIUM', 'ÉLECTRONIQUE', 'AUTOMOBILE', 'AGRICULTURE', 'ÉNERGIE', 'TEXTILE', 'CHIMIE'],
+                data: [42, 38, 35, 28, 22, 18, 15],
+                colors: '#00f3ff'
+            }
+        };
+
+        // Initialisation des graphiques
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeCategoryCharts();
+            startAutoUpdate();
+        });
+
+        function initializeCategoryCharts() {
+            // Graphique de distribution
+            const distributionCtx = document.getElementById('categoryDistributionChart').getContext('2d');
+            new Chart(distributionCtx, {
+                type: 'pie',
+                data: {
+                    labels: categoriesData.distribution.labels,
+                    datasets: [{
+                        data: categoriesData.distribution.data,
+                        backgroundColor: categoriesData.distribution.colors,
+                        borderColor: '#111111',
+                        borderWidth: 2,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 20,
+                                color: '#fff',
+                                font: {
+                                    family: 'Rajdhani',
+                                    size: 12,
+                                    weight: '600'
+                                }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.label}: ${context.raw} mesures`;
+                                }
+                            },
+                            backgroundColor: 'rgba(10, 10, 10, 0.8)',
+                            titleColor: '#00f3ff',
+                            bodyColor: '#fff',
+                            borderColor: '#00f3ff',
+                            borderWidth: 1
+                        }
+                    }
+                }
+            });
+
+            // Graphique d'impact économique
+            const impactCtx = document.getElementById('economicImpactChart').getContext('2d');
+            new Chart(impactCtx, {
+                type: 'bar',
+                data: {
+                    labels: categoriesData.economicImpact.labels,
+                    datasets: [{
+                        label: 'IMPACT COMMERCIAL ($B)',
+                        data: categoriesData.economicImpact.data,
+                        backgroundColor: categoriesData.economicImpact.colors,
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'MILLIARDS USD',
+                                color: '#00f3ff'
+                            },
+                            ticks: {
+                                color: '#fff'
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                color: '#fff',
+                                font: {
+                                    size: 10
+                                }
+                            },
+                            grid: {
+                                display: false
+                            }
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `Impact: $${Math.abs(context.raw)}B ${context.raw >= 0 ? 'positif' : 'négatif'}`;
+                                }
+                            },
+                            backgroundColor: 'rgba(10, 10, 10, 0.8)',
+                            titleColor: '#00f3ff',
+                            bodyColor: '#fff',
+                            borderColor: '#00f3ff',
+                            borderWidth: 1
+                        }
+                    }
+                }
+            });
+
+            // Graphique des mesures par secteur
+            const sectorCtx = document.getElementById('sectorMeasuresChart').getContext('2d');
+            new Chart(sectorCtx, {
+                type: 'bar',
+                data: {
+                    labels: categoriesData.sectors.labels,
+                    datasets: [{
+                        label: 'NOMBRE DE MESURES',
+                        data: categoriesData.sectors.data,
+                        backgroundColor: categoriesData.sectors.colors,
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    indexAxis: 'y',
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'NOMBRE DE MESURES',
+                                color: '#00f3ff'
+                            },
+                            ticks: {
+                                color: '#fff'
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            }
+                        },
+                        y: {
+                            ticks: {
+                                color: '#fff'
+                            },
+                            grid: {
+                                display: false
+                            }
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            backgroundColor: 'rgba(10, 10, 10, 0.8)',
+                            titleColor: '#00f3ff',
+                            bodyColor: '#fff',
+                            borderColor: '#00f3ff',
+                            borderWidth: 1
+                        }
+                    }
+                }
+            });
+        }
+
+        function startAutoUpdate() {
+            setInterval(() => {
+                updateTimestamps();
+            }, 5000);
+            
+            // Initial update
+            updateTimestamps();
+        }
+
+        function updateTimestamps() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('fr-FR');
+            const dateString = now.toLocaleDateString('fr-FR');
+            
+            document.getElementById('updateTime1').textContent = timeString;
+            document.getElementById('globalUpdateTime').textContent = `${dateString} ${timeString}`;
+        }
+    </script>
+</body>
+</html>
